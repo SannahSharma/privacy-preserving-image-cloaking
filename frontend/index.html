@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy-Preserving Image Cloaking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .canvas-container { position: relative; display: inline-block; width: 100%; }
+        .canvas-container img { width: 100%; height: auto; display: block; border-radius: 0.5rem; }
+        .canvas-container canvas { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            pointer-events: none; border-radius: 0.5rem; opacity: 0.55; mix-blend-mode: color-dodge;
+        }
+        .spinner {
+            border-top-color: #6366f1;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6 font-sans">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-5 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                    🛡️ Image Cloaking Studio
+                </h1>
+                <p class="text-sm text-slate-400 mt-1">
+                    Adversarial protection against automated facial recognition & AI feature extraction.
+                </p>
+            </div>
+            <div id="backendStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
+                <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                <span id="statusText">Checking Backend...</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Panel: Controls -->
+            <div class="bg-slate-800/80 rounded-xl p-6 border border-slate-700/80 shadow-xl space-y-6">
+                <form id="cloakForm" class="space-y-5">
+                    
+                    <!-- File Upload -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Upload Image</label>
+                        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" required
+                            class="block w-full text-xs text-slate-400
+                            file:mr-3 file:py-2 file:px-3
+                            file:rounded-md file:border-0
+                            file:text-xs file:font-semibold
+                            file:bg-indigo-600 file:text-white
+                            hover:file:bg-indigo-500
+                            cursor-pointer border border-slate-700 rounded-lg bg-slate-900/60 p-1">
+                        <p class="text-[11px] text-slate-500 mt-1">PNG, JPG, or WEBP (Max 10MB)</p>
+                    </div>
+
+                    <!-- Model Picker -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Model Architecture</label>
+                        <select id="modelSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-200 focus:ring-1 focus:ring-indigo-500 outline-none">
+                            <option value="resnet50">ResNet-50 (Live)</option>
+                            <option value="mobilenetv3" disabled>MobileNet V3 (Not Implemented)</option>
+                            <option value="vit" disabled>Vision Transformer (Not Implemented)</option>
+                        </select>
+                    </div>
+
+                    <!-- Method Selection (FGSM vs PGD) -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Perturbation Method</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="method" value="fgsm" class="peer sr-only" checked>
+                                <div class="rounded-lg border border-slate-700 p-2.5 text-center peer-checked:bg-indigo-600 peer-checked:border-indigo-500 peer-checked:text-white hover:bg-slate-700/50 transition">
+                                    <div class="text-sm font-semibold">FGSM</div>
+                                    <div class="text-[10px] opacity-75">Fast (1-step)</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="method" value="pgd" class="peer sr-only">
+                                <div class="rounded-lg border border-slate-700 p-2.5 text-center peer-checked:bg-indigo-600 peer-checked:border-indigo-500 peer-checked:text-white hover:bg-slate-700/50 transition">
+                                    <div class="text-sm font-semibold">PGD</div>
+                                    <div class="text-[10px] opacity-75">Strong (Iterative)</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Strength Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Strength ($\epsilon$)</label>
+                            <span id="strengthValue" class="text-sm font-mono text-indigo-400 font-semibold">0.50</span>
+                        </div>
+                        <input type="range" id="strengthInput" min="0.0" max="1.0" step="0.01" value="0.5" 
+                            class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+
+                    <!-- Action Button -->
+                    <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 shadow-lg shadow-indigo-600/25 flex justify-center items-center gap-2">
+                        <span>Apply Cloak</span>
+                    </button>
+                </form>
+
+                <!-- Processing Spinner -->
+                <div id="loadingState" class="hidden flex-col items-center justify-center p-4 bg-slate-900/50 rounded-lg border border-slate-700 text-center space-y-2">
+                    <div class="spinner w-7 h-7 border-3 border-transparent rounded-full"></div>
+                    <p id="loadingText" class="text-xs text-indigo-300 font-medium">Processing request...</p>
+                </div>
+
+                <!-- Error Container -->
+                <div id="errorAlert" class="hidden p-3 bg-red-950/60 border border-red-500/50 text-red-300 rounded-lg text-xs space-y-1">
+                </div>
+            </div>
+
+            <!-- Right Panel: Visual Comparison & Results -->
+            <div class="col-span-1 lg:col-span-2 space-y-6">
+                
+                <!-- Metrics Header (Shown after run) -->
+                <div id="metricsPanel" class="hidden grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+                    <div>
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-wider">SSIM Similarity</span>
+                        <span id="metricSsim" class="text-lg font-mono font-bold text-emerald-400">--</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-wider">Engine Runtime</span>
+                        <span id="metricTime" class="text-lg font-mono font-bold text-blue-400">--</span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1 flex items-center justify-start sm:justify-end">
+                        <a id="downloadBtn" href="#" download="cloaked_image.png" class="w-full sm:w-auto text-center bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 shadow-md">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Save Result
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Image Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    
+                    <!-- Original Image Container -->
+                    <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-sm font-semibold text-slate-200">Original Image</h3>
+                                <span id="origConfBadge" class="text-[11px] font-mono text-slate-400">--</span>
+                            </div>
+                            <div class="canvas-container bg-slate-900/80 rounded-lg min-h-[260px] flex items-center justify-center border border-slate-700/60 overflow-hidden">
+                                <img id="origPreview" class="hidden" alt="Original Upload">
+                                <canvas id="activationCanvas" class="hidden"></canvas>
+                                <span id="origPlaceholder" class="text-xs text-slate-500">No image loaded</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-2.5 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-[10px] text-slate-500 block uppercase">Top Prediction</span>
+                            <span id="origLabel" class="text-sm font-semibold text-slate-200 capitalize">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Cloaked Output Container -->
+                    <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-sm font-semibold text-slate-200">Cloaked Output</h3>
+                                <span id="cloakConfBadge" class="text-[11px] font-mono text-slate-400">--</span>
+                            </div>
+                            <div class="canvas-container bg-slate-900/80 rounded-lg min-h-[260px] flex items-center justify-center border border-slate-700/60 overflow-hidden">
+                                <img id="cloakPreview" class="hidden" alt="Cloaked Result">
+                                <span id="cloakPlaceholder" class="text-xs text-slate-500">Awaiting processing</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-2.5 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-[10px] text-slate-500 block uppercase">Post-Cloak Prediction</span>
+                            <span id="cloakLabel" class="text-sm font-semibold text-indigo-400 capitalize">--</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+
+        // Element Selectors
+        const form = document.getElementById('cloakForm');
+        const imageInput = document.getElementById('imageInput');
+        const strengthInput = document.getElementById('strengthInput');
+        const strengthValue = document.getElementById('strengthValue');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingState = document.getElementById('loadingState');
+        const loadingText = document.getElementById('loadingText');
+        const errorAlert = document.getElementById('errorAlert');
+
+        const origPreview = document.getElementById('origPreview');
+        const origPlaceholder = document.getElementById('origPlaceholder');
+        const activationCanvas = document.getElementById('activationCanvas');
+        const cloakPreview = document.getElementById('cloakPreview');
+        const cloakPlaceholder = document.getElementById('cloakPlaceholder');
+
+        // Check Backend Health
+        async function checkHealth() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            try {
+                const res = await fetch(`${API_BASE}/health`);
+                if (res.ok) {
+                    const data = await res.json();
+                    statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+                    statusText.textContent = `Backend Live (${data.engine_mode})`;
+                } else {
+                    throw new Error();
+                }
+            } catch {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+                statusText.textContent = "Backend Offline (Port 8000)";
+            }
+        }
+        checkHealth();
+
+        // Strength Slider Display
+        strengthInput.addEventListener('input', (e) => {
+            strengthValue.textContent = parseFloat(e.target.value).toFixed(2);
+        });
+
+        // Image Preview Handler
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                origPreview.src = url;
+                origPreview.classList.remove('hidden');
+                origPlaceholder.classList.add('hidden');
+
+                // Reset output fields
+                cloakPreview.classList.add('hidden');
+                cloakPlaceholder.classList.remove('hidden');
+                activationCanvas.classList.add('hidden');
+                document.getElementById('metricsPanel').classList.add('hidden');
+                resetLabels();
+            }
+        });
+
+        function resetLabels() {
+            document.getElementById('origLabel').textContent = '--';
+            document.getElementById('origConfBadge').textContent = '--';
+            document.getElementById('cloakLabel').textContent = '--';
+            document.getElementById('cloakConfBadge').textContent = '--';
+        }
+
+        function showError(msg) {
+            errorAlert.innerHTML = `<strong>Error:</strong> ${msg}`;
+            errorAlert.classList.remove('hidden');
+        }
+
+        // Draw 7x7 Activation Map Grid Overlay
+        function renderActivationGrid(points, imgElement, canvas) {
+            canvas.classList.remove('hidden');
+            canvas.width = imgElement.width || 300;
+            canvas.height = imgElement.height || 300;
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const gridCols = 7;
+            const gridRows = 7;
+            const cellW = canvas.width / gridCols;
+            const cellH = canvas.height / gridRows;
+
+            points.forEach(p => {
+                const col = Math.min(Math.floor(p.x * gridCols), gridCols - 1);
+                const row = Math.min(Math.floor(p.y * gridRows), gridRows - 1);
+                
+                // Color mapping according to activation intensity
+                ctx.fillStyle = `rgba(239, 68, 68, ${p.intensity * 0.8})`; 
+                ctx.fillRect(col * cellW, row * cellH, cellW, cellH);
+            });
+        }
+
+        // Form Submit Execution
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorAlert.classList.add('hidden');
+
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const strength = strengthInput.value;
+            const model_name = document.getElementById('modelSelect').value;
+
+            // UI State updates
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50');
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex');
+            
+            loadingText.textContent = method === 'pgd' 
+                ? 'Running PGD iterative gradient steps (may take a few seconds)...' 
+                : 'Applying FGSM perturbation...';
+
+            const formData = new FormData();
+            formData.append('image', file, file.name);
+            formData.append('strength', strength);
+            formData.append('model_name', model_name);
+            formData.append('method', method);
+
+            try {
+                const response = await fetch(`${API_BASE}/cloak`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    let errDetail = 'Processing failed.';
+                    if (response.status === 415) errDetail = 'Unsupported media type. Ensure PNG/JPG/WEBP.';
+                    else if (response.status === 413) errDetail = 'File size exceeds 10MB limit.';
+                    else if (response.status === 422) errDetail = 'Invalid parameters sent to engine.';
+                    else if (response.status === 501) errDetail = 'Selected model architecture is not implemented.';
+                    throw new Error(`[${response.status}] ${errDetail}`);
+                }
+
+                const data = await response.json();
+
+                // 1. Render Cloaked Image from Base64
+                const base64Data = `data:image/png;base64,${data.cloaked_image_base64}`;
+                cloakPreview.src = base64Data;
+                cloakPreview.classList.remove('hidden');
+                cloakPlaceholder.classList.add('hidden');
+
+                // 2. Setup Download Link
+                document.getElementById('downloadBtn').href = base64Data;
+
+                // 3. Predictions Display
+                const orig = data.original_predictions[0];
+                const cloaked = data.cloaked_predictions[0];
+
+                document.getElementById('origLabel').textContent = orig.label;
+                document.getElementById('origConfBadge').textContent = `${(orig.confidence * 100).toFixed(1)}% conf`;
+
+                const cloakLabel = document.getElementById('cloakLabel');
+                cloakLabel.textContent = cloaked.label;
+                document.getElementById('cloakConfBadge').textContent = `${(cloaked.confidence * 100).toFixed(1)}% conf`;
+
+                // Highlight status: green if prediction changed, yellow if confidence dropped
+                if (orig.label !== cloaked.label) {
+                    cloakLabel.className = 'text-sm font-semibold text-emerald-400 capitalize';
+                } else {
+                    cloakLabel.className = 'text-sm font-semibold text-amber-400 capitalize';
+                }
+
+                // 4. Metrics
+                document.getElementById('metricSsim').textContent = data.ssim_score.toFixed(4);
+                document.getElementById('metricTime').textContent = `${data.processing_time_ms.toFixed(1)} ms`;
+                document.getElementById('metricsPanel').classList.remove('hidden');
+
+                // 5. Render Activation Map Grid
+                if (data.activation_map && data.activation_map.length > 0) {
+                    renderActivationGrid(data.activation_map, origPreview, activationCanvas);
+                }
+
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50');
+                loadingState.classList.add('hidden');
+                loadingState.classList.remove('flex');
+            }
+        });
+    </script>
+</body>
+</html>
