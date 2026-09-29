@@ -1,0 +1,121 @@
+identity,original_recognized_correctly,original_top_identity,cloaked_top_identity,identity_changed,original_similarity_to_true,cloaked_similarity_to_true,similarity_drop
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7372410893432874,0.7348986864082616,0.0023424029350257447
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7850431799880759,0.784489750861337,0.0005534291267389468
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7287419438354833,0.7182369232170551,0.010505020618428174
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7875297069541685,0.7727572917930504,0.014772415161118047
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7199715375893068,0.711812198161367,0.008159339427939782
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7155915498726364,0.7089095711700979,0.006681978702538505
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7996165752402892,0.7952294349662458,0.004387140274043411
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7937504053107907,0.7852170467368856,0.008533358573905026
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.8232324123374335,0.8086566925040741,0.014575719833359368
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7429856061927994,0.7431627511970718,-0.00017714500427234992
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.6853610277169049,0.6663663387291919,0.01899468898771295
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.6978523731224711,0.6730243563645307,0.02482801675794033
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7621178627006538,0.7562216520301885,0.005896210670465307
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7765258550636155,0.7732498645774738,0.003275990486141689
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7776685953132482,0.775424182414233,0.0022444128990151135
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.6828098297112312,0.683884423009929,-0.0010745932986978568
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.5814957618707564,0.5723282694810865,0.009167492389669851
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7587272524826091,0.7413659095756746,0.017361342906934474
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7497186660759104,0.7370461225502273,0.012672543525683144
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.6168872117990046,0.6152299642556713,0.0016572475433332956
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7419117689125271,0.7608730792991658,-0.01896131038663873
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.7337646484367661,0.7403309345237957,-0.0065662860870295825
+Atal Bihari Vajpayee,True,Atal Bihari Vajpayee,Atal Bihari Vajpayee,False,0.732986569403869,0.7375929355613962,-0.004606366157527186
+David Trimble,True,David Trimble,David Trimble,False,0.6696147322648027,0.6727431416504808,-0.0031284093856780437
+David Trimble,True,David Trimble,David Trimble,False,0.8329519033423677,0.8352353572837106,-0.0022834539413428834
+David Trimble,True,David Trimble,David Trimble,False,0.7321168780319521,0.7167935967438205,0.015323281288131652
+David Trimble,True,David Trimble,David Trimble,False,0.8303004503241819,0.8356153964987981,-0.005314946174616253
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8451530933371675,0.8449987769118441,0.0001543164253233753
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7671896219245867,0.7658392190925568,0.0013504028320299177
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7882608175269826,0.7945070862762135,-0.006246268749230843
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8591942787161817,0.8578540086737636,0.0013402700424181013
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8548220396033321,0.8419497013083621,0.012872338294970032
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8822168111792325,0.8615731514429269,0.020643659736305553
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8544292449942626,0.8483533859244445,0.0060758590698181125
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7342987656585979,0.7216066122047837,0.012692153453814137
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8494056463233083,0.8338205814353233,0.015585064887984945
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7638748288146963,0.7398135662071459,0.02406126260755037
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8120139837256893,0.8101154565803055,0.0018985271453838548
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8917367458334587,0.8987446427336288,-0.0070078969001700075
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7523899674408063,0.745031177996844,0.007358789443962288
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7457485198967151,0.7344709634773539,0.011277556419361234
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7927083373061835,0.7580521702758837,0.034656167030299834
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.795243144034544,0.7738364934913525,0.021406650543191463
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8855777382841791,0.8773974180212782,0.008180320262900831
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8733457922926752,0.8529991507521681,0.020346641540507027
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8645063042632041,0.8588745594016068,0.005631744861597232
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8842401504507759,0.8924038410177842,-0.008163690567008386
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.805122375487476,0.8012009263030623,0.003921449184413728
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8566995859137551,0.864647984503835,-0.007948398590079897
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8522610664359153,0.847847878932105,0.004413187503810256
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7629220485679626,0.7742323279373056,-0.011310279369342924
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8079336881629493,0.8099599480620867,-0.002026259899137406
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8246501088134148,0.8371243476859304,-0.01247423887251553
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8264507055274327,0.828909695147639,-0.0024589896202062977
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7299890518181176,0.7275416254989977,0.002447426319119872
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7913891077033711,0.7767206430427412,0.014668464660629876
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8148259520522552,0.8131221532813523,0.0017037987709028757
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7194374799721198,0.7340894937507917,-0.014652013778671868
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8207169175139802,0.8228688240043041,-0.0021519064903238183
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8146245479575593,0.7620114088050851,0.05261313915247423
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8761082887640774,0.8801841282616243,-0.004075839497546863
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7274132966987964,0.7272312966302159,0.00018200006858049012
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7830606102935589,0.7897881269447058,-0.006727516651146903
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.806089401244311,0.8137508630744426,-0.0076614618301315
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7701256871215748,0.7546182870857321,0.015507400035842722
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7546289416918922,0.7705278992645187,-0.015898957572626493
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.760658681391909,0.7559310197822641,0.004727661609644884
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.764517275747813,0.7511683106414911,0.013348965106321886
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.6517816781991163,0.6479440927499013,0.0038375854492149752
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.804429173468739,0.8011589050284956,0.0032702684402433624
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8320573568335795,0.8178181648246216,0.014239192008957957
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7791653871528462,0.752906084059916,0.02625930309293023
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7890383601180768,0.7796711921684097,0.009367167949667077
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7618265748016367,0.7659828662864654,-0.004156291484828656
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7465265989296123,0.7174689769737698,0.029057621955842494
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8404148817053974,0.8328260183326022,0.007588863372795185
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8533301949492503,0.8358500003806338,0.01748019456861649
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8608254194251035,0.8545753869152695,0.006250032509834025
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8573133945456514,0.8620550632468186,-0.004741668701167212
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8163398504249038,0.8043260574332777,0.012013792991626082
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7462654113762068,0.7361636161796837,0.0101017951965231
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8469148874274367,0.8378928899756635,0.009021997451773234
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8471550941458813,0.8211234807959927,0.02603161334988857
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8417694568625614,0.8370308279982779,0.004738628864283556
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7421979904167382,0.7267526821339422,0.015445308282796
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7726233005515954,0.7746343612663151,-0.0020110607147196813
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7698082923881462,0.7659101486198395,0.003898143768306661
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8403000831595601,0.8472831249228587,-0.00698304176329867
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8398982286444847,0.8386296629897314,0.0012685656547533064
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8402660489073933,0.8404833674422442,-0.00021731853485085217
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8804469108572738,0.863569259642691,0.016877651214582734
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8630247712126684,0.8383823633185585,0.024642407894109875
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8626495003691629,0.8552166223517448,0.007432878017418099
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.797241592735257,0.8002673387519462,-0.003025746016689257
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8087602853766936,0.795762896536985,0.01299738883970869
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7667943239204368,0.7563636302940434,0.010430693626393372
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8055531018304992,0.7976207137099872,0.007932388120512002
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.6919783353798622,0.6689246892922387,0.023053646087623503
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8872503042212196,0.8723883628836491,0.014861941337570572
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8690521121016395,0.8650199174872331,0.004032194614406404
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8514108657828399,0.8546812534323728,-0.003270387649532913
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7568000555030884,0.695233345031043,0.06156671047204543
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7836045026771338,0.7916201353065203,-0.008015632629386538
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7899817824355808,0.7715041637412938,0.01847761869428699
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8290283679953867,0.8285412090138977,0.00048715898148898873
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8720839023581366,0.8732669353476374,-0.001183032989500843
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.9056664705267432,0.9007829427710108,0.00488352775573242
+Donald Rumsfeld,False,Abel Pacheco,Judi Dench,True,0.4156992137427941,0.4098209440704062,0.005878269672387915
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8012917637816999,0.7921614646903699,0.009130299091330007
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7798199057571241,0.7778441905967562,0.0019757151603678746
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8089957237235562,0.8119041919700132,-0.0029084682464569633
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8295661211005497,0.8262822031966529,0.003283917903896816
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.794285416602294,0.8046405315391123,-0.010355114936818288
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.79070758819501,0.7897338867179602,0.000973701477049782
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8106548190108775,0.8089326847863828,0.0017221342244947424
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8527013063422259,0.8587216138831134,-0.0060203075408875595
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8581548929205896,0.8660942316046636,-0.007939338684074038
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7882854938499196,0.8062927722922845,-0.018007278442364827
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.8032435774795128,0.7967854738227506,0.0064581036567622485
+Donald Rumsfeld,True,Donald Rumsfeld,Donald Rumsfeld,False,0.7759812474243033,0.7562848329536503,0.019696414470652956

@@ -11,7 +11,7 @@ returns a dict with keys:
     activation_map, ssim_score
 (exact shapes are documented inline below, next to where each is built.)
 
-STATUS: LIVE — wired to Person A's real app/cloak_engine.py (2026-07-22).
+STATUS: LIVE — unified backend engine with ResNet-50, MobileNetV3 and ViT support.
 """
 
 import io
@@ -30,13 +30,12 @@ from app.cloak_engine import cloak_image as _cloak_image
 
 ENGINE_MODE = "live"
 
-# Person A's engine currently only implements ResNet-50. MobileNetV3/ViT are
-# listed for the frontend to show as "coming soon" but aren't callable yet —
-# requesting them raises NotImplementedError, which main.py turns into a 501.
+# The backend engine supports all three ImageNet target models. Face-mode support
+# remains a future face-recognition pipeline; these models are currently ImageNet classifiers.
 SUPPORTED_MODELS = [
-    {"name": "resnet50", "display_name": "ResNet-50", "supports_face_mode": True, "implemented": True},
-    {"name": "mobilenetv3", "display_name": "MobileNetV3", "supports_face_mode": True, "implemented": False},
-    {"name": "vit", "display_name": "Vision Transformer", "supports_face_mode": False, "implemented": False},
+    {"name": "resnet50", "display_name": "ResNet-50", "supports_face_mode": False, "implemented": True},
+    {"name": "mobilenetv3", "display_name": "MobileNetV3", "supports_face_mode": False, "implemented": True},
+    {"name": "vit", "display_name": "Vision Transformer", "supports_face_mode": False, "implemented": True},
 ]
 _IMPLEMENTED_MODELS = {m["name"] for m in SUPPORTED_MODELS if m["implemented"]}
 
@@ -83,7 +82,7 @@ def _compute_ssim(original: Image.Image, cloaked: Image.Image) -> float | None:
         return None
 
 
-def apply_cloak(image_bytes: bytes, strength: float, model_name: str, method: str = "fgsm") -> dict:
+def apply_cloak(image_bytes: bytes, strength: float, model_name: str, method: str = "fgsm", protection_mode: str = "standard") -> dict:
     if model_name not in _IMPLEMENTED_MODELS:
         raise NotImplementedError(
             f"'{model_name}' is not implemented yet by the cloaking engine — only "
@@ -92,7 +91,7 @@ def apply_cloak(image_bytes: bytes, strength: float, model_name: str, method: st
 
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-    result = _cloak_image(image, strength=strength, method=method)
+    result = _cloak_image(image, strength=strength, method=method, model_name=model_name, protection_mode=protection_mode)
     cloaked_image = result["cloaked_image"]
 
     out_buf = io.BytesIO()
@@ -111,4 +110,8 @@ def apply_cloak(image_bytes: bytes, strength: float, model_name: str, method: st
         }],
         "activation_map": _grid_to_points(result["activation_map"]),
         "ssim_score": _compute_ssim(image, cloaked_image),
+        "misclassified": result["misclassified"],
+        "epsilon": result["epsilon"],
+        "confidence_drop": result["confidence_drop"],
+        "original_class_confidence_after": result["original_class_confidence_after"],
     }

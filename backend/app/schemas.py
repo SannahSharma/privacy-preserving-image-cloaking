@@ -29,7 +29,12 @@ class CloakResponse(BaseModel):
     cloaked_image_base64: str  # PNG, base64-encoded, no data-URI prefix
     model_used: ModelName
     method_used: str  # "fgsm" or "pgd"
+    protection_mode: str
     strength: float
+    epsilon: float
+    misclassified: bool
+    confidence_drop: float
+    original_class_confidence_after: float
 
     original_predictions: list[Prediction]
     cloaked_predictions: list[Prediction]

@@ -67,6 +67,9 @@ def evaluate_image(path):
             "cloaked_class": result["cloaked_class"],
             "cloaked_confidence": result["cloaked_confidence"],
             "confidence_in_original_class_after": conf_in_original_after,
+            "confidence_drop": result["original_confidence"] - conf_in_original_after,
+            "misclassified": result["original_class"] != result["cloaked_class"],
+            "epsilon": STRENGTH * 0.06,
             "ssim": score,
             "seconds": round(elapsed, 2),
         })

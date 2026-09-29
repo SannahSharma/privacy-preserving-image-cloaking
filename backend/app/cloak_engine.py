@@ -1,206 +1,158 @@
-try:
-    import torch
-    import torch.nn.functional as F
-    from torchvision import models, transforms
-    TORCH_AVAILABLE = True
-except ImportError:
-    torch = None
-    F = None
-    models = None
-    transforms = None
-    TORCH_AVAILABLE = False
+"""Adversarial cloaking engine used by the FastAPI backend.
 
+Supports ResNet-50, MobileNetV3-Large and ViT-B/16 with FGSM/PGD.
+The original image resolution is preserved by generating the perturbation at
+224x224 and resizing only the perturbation back onto the original image.
+"""
+import torch
+import torch.nn.functional as F
+from torchvision import models, transforms
 from PIL import Image
-import numpy as np
 
-if TORCH_AVAILABLE:
-    # Load the pretrained ResNet-50 model once, when this module is first imported.
-    # Reused by every call to cloak_image() — we don't want to reload it every time.
-    _model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
-    _model.eval()
+MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
-    _preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-        ),
-    ])
+_MODELS = {}
+_ACTIVATIONS = {}
 
-    # The exact mean/std used above — needed again later to convert normalized
-    # differences back into real pixel-scale differences.
-    _MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-    _STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
-    # --- Activation hook setup ---
-    _activation = {}
+def _build_model(model_name):
+    if model_name == "resnet50":
+        model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+        layer = model.layer4
+    elif model_name == "mobilenetv3":
+        model = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT)
+        layer = model.features[-1]
+    elif model_name == "vit":
+        model = models.vit_b_16(weights=models.ViT_B_16_Weights.DEFAULT)
+        layer = model.encoder.ln
+    else:
+        raise NotImplementedError(f"Unsupported model: {model_name}")
+    model.eval()
 
-    def _save_activation(name):
-        """Returns a hook function that stores a layer's output into _activation[name]."""
-        def hook(module, layer_input, layer_output):
-            _activation[name] = layer_output.detach()
-        return hook
+    def hook(_module, _inputs, output):
+        _ACTIVATIONS[model_name] = output.detach()
+    layer.register_forward_hook(hook)
+    return model
 
-    _model.layer4.register_forward_hook(_save_activation("layer4"))
 
-    def _get_prediction(tensor):
-        """Return (predicted_class, confidence) for a preprocessed 224x224 tensor."""
-        with torch.no_grad():
-            output = _model(tensor)
-            probs = torch.softmax(output, dim=1)
-            confidence, predicted_class = torch.max(probs, 1)
-        return predicted_class.item(), confidence.item()
+def _get_model(model_name):
+    if model_name not in _MODELS:
+        _MODELS[model_name] = _build_model(model_name)
+    return _MODELS[model_name]
 
-    def _fgsm_attack(input_tensor, true_label, epsilon):
-        """Nudge every pixel slightly to increase the model's loss, bounded by epsilon. One step."""
-        input_tensor = input_tensor.clone().detach()
-        input_tensor.requires_grad = True
 
-        output = _model(input_tensor)
-        loss = F.cross_entropy(output, true_label)
-        _model.zero_grad()
+_PREPROCESS = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=MEAN.flatten().tolist(), std=STD.flatten().tolist()),
+])
+
+
+def _predict(model, tensor):
+    with torch.no_grad():
+        probs = torch.softmax(model(tensor), dim=1)
+        confidence, predicted = probs.max(1)
+    return predicted.item(), confidence.item()
+
+
+def _fgsm(model, x, label, epsilon):
+    x = x.detach().clone().requires_grad_(True)
+    loss = F.cross_entropy(model(x), label)
+    model.zero_grad(set_to_none=True)
+    loss.backward()
+    return (x + epsilon * x.grad.sign()).detach()
+
+
+def _pgd(model, x, label, epsilon, alpha, steps=10):
+    original = x.detach().clone()
+    adv = original.clone()
+    for _ in range(steps):
+        adv.requires_grad_(True)
+        loss = F.cross_entropy(model(adv), label)
+        model.zero_grad(set_to_none=True)
         loss.backward()
+        adv = adv.detach() + alpha * adv.grad.sign()
+        delta = torch.clamp(adv - original, -epsilon, epsilon)
+        adv = (original + delta).detach()
+    return adv
 
-        perturbation = epsilon * input_tensor.grad.sign()
-        cloaked = input_tensor + perturbation
-        cloaked = torch.clamp(cloaked, input_tensor.min(), input_tensor.max())
-        return cloaked.detach()
 
-    def _pgd_attack(input_tensor, true_label, epsilon, alpha, steps):
-        """
-        Same idea as FGSM, but repeated in small steps ('alpha' sized), each time
-        projecting the total change back into the epsilon boundary. Stronger, slower.
-        """
-        original = input_tensor.clone().detach()
-        cloaked = input_tensor.clone().detach()
+def _activation_grid(model_name):
+    act = _ACTIVATIONS.get(model_name)
+    if act is None:
+        return [[0.0] * 7 for _ in range(7)]
 
-        for _ in range(steps):
-            cloaked.requires_grad = True
-            output = _model(cloaked)
-            loss = F.cross_entropy(output, true_label)
-            _model.zero_grad()
-            loss.backward()
-
-            cloaked = cloaked + alpha * cloaked.grad.sign()
-            perturbation = torch.clamp(cloaked - original, -epsilon, epsilon)
-            cloaked = torch.clamp(original + perturbation,
-                                   original.min(), original.max()).detach()
-
-        return cloaked
-
-    def _full_tensor_to_image(tensor):
-        """Convert a raw 0-1 pixel-scale tensor (no normalization applied) into a PIL image."""
-        tensor = tensor.squeeze(0).clamp(0, 1)
-        array = (tensor.permute(1, 2, 0).numpy() * 255).astype("uint8")  # CHW -> HWC, scale to 0-255
-        return Image.fromarray(array)
-
-    def _activation_to_grid(activation_tensor):
-        """
-        Convert layer4's raw activation tensor into a small 2D grid of numbers (0-1),
-        simple enough for the frontend to draw as a heatmap/overlay.
-        """
-        grid = activation_tensor[0].mean(dim=0)  # [2048, 7, 7] -> [7, 7]
-        grid_min, grid_max = grid.min(), grid.max()
-        grid = (grid - grid_min) / (grid_max - grid_min + 1e-8)
-        return grid.tolist()
-
-    def cloak_image(image: Image.Image, strength: float, method: str = "fgsm"):
-        """
-        Main engine function — the contract Person B (backend) will call.
-
-        Args:
-            image: a PIL Image (already opened, RGB), ANY size
-            strength: float from 0.0 to 1.0, controls how aggressive the cloaking is
-            method: "fgsm" (fast, default) or "pgd" (stronger, slower)
-
-        Returns:
-            dict with:
-                cloaked_image: PIL Image, SAME size as the input image
-                original_class: int, predicted class index before cloaking
-                original_confidence: float
-                cloaked_class: int, predicted class index after cloaking (re-checked on the final image)
-                cloaked_confidence: float
-                activation_map: 7x7 nested list of floats (0-1)
-        """
-        epsilon = strength * 0.06
-        original_width, original_height = image.size  # PIL gives (width, height)
-
-        # Step 1: build the small 224x224 view the model actually needs
-        input_tensor = _preprocess(image).unsqueeze(0)
-
-        original_class, original_confidence = _get_prediction(input_tensor)
-        true_label = torch.tensor([original_class])
-
-        # Step 2: run the attack on that small 224x224 view
-        if method == "pgd":
-            alpha = epsilon / 4
-            cloaked_tensor_small = _pgd_attack(input_tensor, true_label, epsilon, alpha, steps=10)
+    if model_name == "vit":
+        # ViT encoder output: [1, 197, 768]. Drop CLS token and reshape
+        # 196 patch tokens to 14x14, then resize to the common 7x7 contract.
+        grid = act[:, 1:, :].norm(dim=-1).reshape(1, 1, 14, 14)
+        grid = F.interpolate(grid, size=(7, 7), mode="bilinear", align_corners=False)[0, 0]
+    else:
+        if act.ndim == 4:
+            grid = act[0].mean(dim=0)
         else:
-            cloaked_tensor_small = _fgsm_attack(input_tensor, true_label, epsilon)
+            grid = act.mean(dim=-1).reshape(1, 1, -1)
+            grid = F.interpolate(grid, size=49, mode="linear", align_corners=False).reshape(7, 7)
 
-        # Step 3: extract just the CHANGE the attack made, converted from normalized
-        # space back into real pixel-scale space (multiplying by std undoes Normalize's scaling).
-        delta_small = (cloaked_tensor_small - input_tensor) * _STD  # shape [1, 3, 224, 224]
+    grid_min, grid_max = grid.min(), grid.max()
+    return ((grid - grid_min) / (grid_max - grid_min + 1e-8)).tolist()
 
-        # Step 4: stretch that small perturbation up to the original image's real size
-        delta_full = F.interpolate(
-            delta_small,
-            size=(original_height, original_width),  # interpolate wants (H, W)
-            mode="bilinear",
-            align_corners=False,
-        )
 
-        # Step 5: add that perturbation onto the ORIGINAL, full-resolution image
-        original_full_tensor = transforms.ToTensor()(image).unsqueeze(0)  # raw 0-1 pixels, full size
-        cloaked_full_tensor = torch.clamp(original_full_tensor + delta_full, 0, 1)
-        cloaked_image = _full_tensor_to_image(cloaked_full_tensor)
+def cloak_image(image: Image.Image, strength: float, method: str = "fgsm",
+                model_name: str = "resnet50", protection_mode: str = "standard"):
+    if not 0.0 <= strength <= 1.0:
+        raise ValueError("strength must be between 0.0 and 1.0")
+    if method not in {"fgsm", "pgd"}:
+        raise ValueError("method must be 'fgsm' or 'pgd'")
+    if protection_mode not in {"standard", "strong"}:
+        raise ValueError("protection_mode must be 'standard' or 'strong'")
 
-        # Step 6: re-check the prediction on the ACTUAL final image (same way a real
-        # downstream classifier would: it resizes/crops whatever it receives first).
-        recheck_tensor = _preprocess(cloaked_image).unsqueeze(0)
-        cloaked_class, cloaked_confidence = _get_prediction(recheck_tensor)
+    model = _get_model(model_name)
+    # Standard matches the original project contract: max epsilon = 0.06.
+    # Strong extends the bounded budget while keeping the user-facing slider 0-1.
+    epsilon_max = 0.06 if protection_mode == "standard" else 0.125
+    epsilon = strength * epsilon_max
+    image = image.convert("RGB")
+    original_width, original_height = image.size
 
-        activation_map = _activation_to_grid(_activation["layer4"])
+    x = _PREPROCESS(image).unsqueeze(0)
+    original_class, original_confidence = _predict(model, x)
+    label = torch.tensor([original_class])
 
-        return {
-            "cloaked_image": cloaked_image,
-            "original_class": original_class,
-            "original_confidence": original_confidence,
-            "cloaked_class": cloaked_class,
-            "cloaked_confidence": cloaked_confidence,
-            "activation_map": activation_map,
-        }
-else:
-    def _full_tensor_to_image(tensor):
-        """Convert a raw 0-1 pixel-scale tensor (no normalization applied) into a PIL image."""
-        tensor = tensor.squeeze(0)
-        array = np.clip(tensor, 0.0, 1.0)
-        array = (array.transpose(1, 2, 0) * 255).astype("uint8")
-        return Image.fromarray(array)
+    if method == "pgd":
+        adv_small = _pgd(model, x, label, epsilon, epsilon / 4, steps=10)
+    else:
+        adv_small = _fgsm(model, x, label, epsilon)
 
-    def _activation_to_grid(activation_tensor):
-        return [[float(x) for x in row] for row in activation_tensor]
+    delta_small = (adv_small - x) * STD
+    delta_full = F.interpolate(delta_small, size=(original_height, original_width),
+                               mode="bilinear", align_corners=False)
+    original_full = transforms.ToTensor()(image).unsqueeze(0)
+    cloaked = torch.clamp(original_full + delta_full, 0, 1)
+    cloaked_image = Image.fromarray(
+        (cloaked.squeeze(0).permute(1, 2, 0).numpy() * 255).astype("uint8")
+    )
 
-    def cloak_image(image: Image.Image, strength: float, method: str = "fgsm"):
-        image = image.convert("RGB")
+    recheck = _PREPROCESS(cloaked_image).unsqueeze(0)
+    cloaked_class, cloaked_confidence = _predict(model, recheck)
 
-        noise = Image.effect_noise(image.size, 24).convert("RGB")
-        alpha = min(0.18, 0.02 * strength)
-        cloaked_image = Image.blend(image, noise, alpha=alpha)
+    # Re-check probability of the original class; this is more informative than
+    # only looking at the new top-1 class.
+    with torch.no_grad():
+        probs = torch.softmax(model(recheck), dim=1)
+        original_class_conf_after = probs[0, original_class].item()
 
-        original_class = 282
-        original_confidence = 0.88
-        cloaked_class = original_class if strength < 0.67 else original_class + 1
-        cloaked_confidence = round(max(0.24, original_confidence - 0.18 * strength), 4)
-        activation_map = [[round(min(1.0, 0.08 * strength + (r + c) * 0.01), 4) for c in range(7)] for r in range(7)]
-
-        return {
-            "cloaked_image": cloaked_image,
-            "original_class": original_class,
-            "original_confidence": original_confidence,
-            "cloaked_class": cloaked_class,
-            "cloaked_confidence": cloaked_confidence,
-            "activation_map": activation_map,
-        }
+    return {
+        "cloaked_image": cloaked_image,
+        "original_class": original_class,
+        "original_confidence": original_confidence,
+        "cloaked_class": cloaked_class,
+        "cloaked_confidence": cloaked_confidence,
+        "original_class_confidence_after": original_class_conf_after,
+        "confidence_drop": original_confidence - original_class_conf_after,
+        "misclassified": original_class != cloaked_class,
+        "epsilon": epsilon,
+        "activation_map": _activation_grid(model_name),
+    }

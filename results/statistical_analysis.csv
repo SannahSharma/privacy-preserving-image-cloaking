@@ -1,0 +1,13 @@
+comparison,method,n,changed,rate,z_stat,p_value
+default_epsilon,fgsm,120,5,0.041666666666666664,,
+default_epsilon,pgd,120,3,0.025,,
+epsilon8,fgsm,120,16,0.13333333333333333,,
+epsilon8,pgd,120,10,0.08333333333333333,,
+default_vs_epsilon8_fgsm,fgsm,240,21,0.09166666666666667,-2.5128502099070444,0.011976017232633944
+default_vs_epsilon8_pgd,pgd,240,13,0.05833333333333333,-1.9962689698704863,0.045904653719619555
+transfer_mobilenetv3_to_resnet50,fgsm,120,10,0.08333333333333333,,
+transfer_mobilenetv3_to_vit,fgsm,120,6,0.05,,
+transfer_resnet50_to_mobilenetv3,fgsm,120,18,0.15,,
+transfer_resnet50_to_vit,fgsm,120,8,0.06666666666666667,,
+transfer_vit_to_mobilenetv3,fgsm,120,16,0.13333333333333333,,
+transfer_vit_to_resnet50,fgsm,120,10,0.08333333333333333,,
